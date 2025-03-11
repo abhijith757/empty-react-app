@@ -1,0 +1,33 @@
+trigger:
+- main  # Runs the pipeline when code is pushed to the main branch
+ 
+pool:
+  vmImage: 'windows-latest'  # Use Windows for IIS deployment
+ 
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+ 
+steps:
+# Step 1: Restore NuGet Packages (for .NET apps)
+- task: NuGetCommand@2
+  displayName: 'Restore NuGet Packages'
+  inputs:
+    command: 'restore'
+    restoreSolution: '$(solution)'
+ 
+# Step 2: Build the Solution
+- task: VSBuild@1
+  displayName: 'Build Solution'
+  inputs:
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+ 
+# Step 3: Publish Build Artifacts
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Build Artifacts'
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'drop'
